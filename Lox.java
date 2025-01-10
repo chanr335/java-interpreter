@@ -19,12 +19,15 @@ public class Lox {
             runPrompt();
         }
     }
+    static boolean hadERror = false;
 }
 
 //For starting jlox from command line w arguments
 private static void runFile(String path) throws IOException{
     byte[] bytes = Files.readAllBytes(Paths.get(path));
     run(new String(bytes, Charset.defaultCharset()));
+
+    if (hadError) System.exit(65);
 }
 
 //For starting jlox w/o arguments
@@ -33,10 +36,12 @@ private static void runPrompt() throws IOException {
     BufferedReader reader = new BufferedReader(input);
 
     for (;;) {
-        Sytem.out.pring(">");
+        Sytem.out.print(">");
         String line = reader.readLine();
         if (line == null) break;
         run(line);
+
+        hadError = false;
     }
 }
 
@@ -49,4 +54,16 @@ private static void run(String source) {
     for (Token token : tokens){
         System.out.println(token);
     }
+}
+
+
+//Error handling
+static void error(int line, String message){
+    report(line, "", message);
+}
+
+private static void report(int line, String where, String message){
+    System.err.println(
+            "[line " + line + "] Error" + where + ": " + message);
+            hadError = true;
 }
