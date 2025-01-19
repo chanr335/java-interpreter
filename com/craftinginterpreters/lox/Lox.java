@@ -19,7 +19,7 @@ public class Lox {
             runPrompt();
         }
     }
-    static boolean hadERror = false;
+    static boolean hadError = false;
 
     //For starting jlox from command line w arguments
     private static void runFile(String path) throws IOException{
