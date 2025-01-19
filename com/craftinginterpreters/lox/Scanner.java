@@ -81,9 +81,15 @@ class Scanner {
               line++;
               break;
 
+            case '"': string(); break;
+
             default:
+            if (isDigit(c)){
+                number();
+            } else{
               Lox.error(line, "Unexpected character.");
-              break;
+            }
+            break;
         }
     }
 
@@ -113,5 +119,44 @@ class Scanner {
           if (isAtEnd()) return '\0';
           return source.charAt(current);
     }
-}
 
+    private void string(){
+        while (peek() != '"' && !isAtEnd()){
+            if (peek() == '\n') line++;
+            advance();
+        }
+
+        if (isAtEnd()) {
+            Lox.error(line, "Unterminated string.");
+            return;
+        }
+        //the closing "
+        advance();
+
+        String value = source.substring(start + 1, current - 1);
+        addToken(STRING, value);
+    }
+
+    private boolean isDigit(char c){
+        return c >= '0' && c <= '9';
+    }
+
+    private void number(){
+        while(isDigit(peek())) advance();
+
+        if (peek() == '.' && isDigit(peekNext())){
+            advance();
+
+            while (isDigit(peek())) advance();
+        }
+
+        addToken(NUMBER,
+            Double.parseDouble(source.substring(start, current)));
+    }
+    
+    //method for looking past th decimal point 
+    private char peekNext() {
+        if(current + 1 >= source.length()) return '\0';
+        return source.charAt(current + 1);
+    }
+}
