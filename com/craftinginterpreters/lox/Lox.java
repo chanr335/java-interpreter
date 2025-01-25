@@ -20,13 +20,16 @@ public class Lox {
         }
     }
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
 
     //For starting jlox from command line w arguments
     private static void runFile(String path) throws IOException{
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
 
+        //Indicate error in the exit code
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     //For starting jlox w/o arguments
@@ -61,6 +64,12 @@ public class Lox {
     //Error handling
     static void error(int line, String message){
         report(line, "", message);
+    }
+
+    static void runtimeError(RuntimeError error){
+        System.err.println(error.getMessage() +
+            "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message){
