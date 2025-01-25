@@ -19,6 +19,9 @@ public class Lox {
             runPrompt();
         }
     }
+
+    private static final Interpreter interpreter = new Interpreter();
+
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
 
@@ -57,7 +60,7 @@ public class Lox {
         //Stop if theres a syntax error
         if (hadError) return;
 
-        System.out.println(new AstPrinter().print(expression));
+        interpreter.interpret(expression);
     }
 
 
