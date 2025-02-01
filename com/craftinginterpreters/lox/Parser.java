@@ -17,13 +17,6 @@ class Parser {
         this.tokens = tokens;
     }
 
-    //Expr parse(){
-    //    try{
-    //    return expression();
-    //    } catch(ParseError error){
-    //        return null;
-    //    }
-    //}
     List<Stmt> parse(){
         List<Stmt> statements = new ArrayList<>();
         while(!isAtEnd()){
@@ -41,6 +34,7 @@ class Parser {
     //delcaration -> varDecl | statement;
     private Stmt declaration(){
         try{
+            if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
             return statement();
         } catch (ParseError error){
@@ -153,6 +147,27 @@ class Parser {
         return new Stmt.Expression(expr);
     }
 
+    private Stmt.Function function(String kind){
+        Token name = consume(IDENTIFIER, "Expect " + kind + "name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)){
+            do{
+                if (parameters.size() >= 255){
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(
+                    consume(IDENTIFIER, "Expect parameter name."));
+            } while(match(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
+    }
+
     private List<Stmt> block(){
         List<Stmt> statements = new ArrayList<>();
 
@@ -201,9 +216,9 @@ class Parser {
         Expr expr = equality();
 
         while (match(AND)){
-            Token oeprator = previous();
+            Token operator = previous();
             Expr right = equality();
-            expr = new Expr.Logical(expr, oeprator right);
+            expr = new Expr.Logical(expr, operator, right);
         }
 
         return expr;
@@ -298,6 +313,7 @@ class Parser {
                 break;
             }
         }
+        return expr;
     }
 
     //primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")";

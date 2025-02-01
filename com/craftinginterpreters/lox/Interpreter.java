@@ -4,12 +4,27 @@ import java.util.ArrayList;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
-    private Environment environment = new Environment();
+    private Environment globals = new Environment();
+    private Environment environment = globals;
+
+    Interpreter(){
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int arity() { return 0; }
+
+            @Override
+            public Object call(Interpreter interpreter,
+                                List<Object> arguments){
+                return (double)System.currentTimeMillis() / 1000.0;
+            }
+
+            @Override
+            public String toString() {return "<native fn>"; }
+        });
+    }
 
     void interpret(List<Stmt> statements){
         try{
-            //Object value = evaluate(expression);
-            //System.out.println(stringify(value));
             for (Stmt statement : statements){
                 execute(statement);
             }
